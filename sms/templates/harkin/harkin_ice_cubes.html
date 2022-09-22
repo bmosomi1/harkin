@@ -1,0 +1,74 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+{% load filters %}
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Ice Cubes Sales</h3>
+            </div>
+
+            <div class="col-sm-6">
+                <a href="{% url 'sms:harkin_ice_sale' %}" class="btn btn-primary pull-right">New Ice Sale</a>
+            </div>
+        </div>
+        <hr>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Client name</th>
+                    <th>Phone</th>
+                    <th>Sale Type</th>
+                    <th>Location</th>
+                     <th>Quantity Sold</th>
+                    <th>Amount</th>
+                    <th>Payment Mode</th>
+                    <th>Payment Reference</th>
+                    <th>Shop</th>
+                    <th>Sale Date</th>
+
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for ice in ice_cubes %}
+                <tr>
+
+                    <td>{{ ice.client_name }}</td>
+                    <td>{{ ice.phone }}</td>
+                    <td>{{ ice.sale_type }}</td>
+                    <td>{{ ice.location }}</td>
+                    <td>{{ ice.quantity }}</td>
+                    <td>{{ ice.amount }}</td>
+                     <td>{{ ice.payment_mode }}</td>
+                    <td>{{ ice.payment_reference }}</td>
+                    <td>{{ ice.shop_name }}</td>
+                    <td>{{ ice.sale_date |date:'Y-m-d H:i' }}</td>
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

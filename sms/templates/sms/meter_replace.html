@@ -33,6 +33,10 @@
 
                 </div>
                 <div class="form-group">
+                    <label>Meter Number</label>
+                    <input class="form-control" type="text" name="meter_number"  value="" style="width:300px">
+                </div>
+                <div class="form-group">
                     <label>Comment</label>
                     <input class="form-control" type="text" name="comment"  value="New meter replacement" style="width:300px">
                 </div>
@@ -45,7 +49,7 @@
                 <thead>
                 <tr>
                     <th>Client Name</th>
-                    <th>Meter</th>
+                    <th>Meter Number</th>
                     <th>Phone Number</th>
 
 
@@ -60,8 +64,8 @@
                 <tbody>
                 {% for client in replacements %}
                 <tr>
-                    <td><a href="{% url 'Invoices:client_invoices' client.id %}">{{ client.names }}</a></td>
-                    <td>{{ client.client_id }}</td>
+                    <td><a href="{% url 'sms:edit_water_client' client.id %}">{{ client.names }}</a></td>
+                    <td>{{ client.meter_number }}</td>
                     <td>{{ client.phone_number }}</td>
                     <td>{{ client.court }}</td>
 

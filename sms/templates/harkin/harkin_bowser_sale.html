@@ -1,0 +1,68 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+{% load filters %}
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Bowser Sales</h3>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'sms:harkin_add_bowser_sale' %}" class="btn btn-primary pull-right">New Bowser Sale</a>
+            </div>
+        </div>
+        <hr>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Company</th>
+                    <th>Bowser Reg</th>
+                    <th>Driver</th>
+                    <th>Bowser Capacity</th>
+                    <th>Quantity</th>
+                    <th>Payment Method</th>
+                    <th>Reference</th>
+                    <th>Sale Date</th>
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for bowser in meter_readings %}
+                <tr>
+
+                    <td>{{ bowser.bowser_company }}</td>
+                    <td>{{ bowser.reg_number }}</td>
+                    <td>{{ bowser.driver }}</td>
+                    <td>{{ bowser.capacity }}</td>
+                    <td>{{ bowser.quantity_bought }}</td>
+                    <td>{{ bowser.payment_mode }}</td>
+                    <td>{{ bowser.payment_reference }}</td>
+                    <td>{{ bowser.sale_date |date:'Y-m-d H:i' }}</td>
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

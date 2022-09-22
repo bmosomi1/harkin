@@ -1,0 +1,86 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.css" integrity="sha512-p209YNS54RKxuGVBVhL+pZPTioVDcYPZPYYlKWS9qVvQwrlzxBxkR8/48SCP58ieEuBosYiPUS970ixAfI/w/A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+            </div>
+        </div>
+
+            <form action="{% url 'sms:juice_type' %}" method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label>Fruits Name</label>
+                    <input class="form-control" type="text" name="juice_type"  value="" style="width:300px">
+                    <label>Ingredients</label>
+                    <input class="form-control" type="text" name="ingredients"  value="ingredients" style="width:300px">
+                </div>
+                <div class="form-group">
+                    <label>Ingredients</label>
+                    <input class="form-control" type="text" name="ingredients"  value="ingredients" style="width:300px">
+                </div>
+                 <div class="form-group">
+                    <label>Packaging</label>
+                    <input class="form-control" type="text" name="packaging"  value="" style="width:300px">
+                </div>
+                <div class="form-group">
+                    <label>Comments</label>
+                    <input class="form-control" type="text" name="comments"  value="" style="width:300px">
+                </div>
+
+
+            <button type="submit" class="btn btn-sm btn-outline-primary">Add Juice Type</button>
+            </form>
+        </div>
+                <div class="tile-body">
+            <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Juice Type</th>
+                    <th>Ingredients</th>
+                    <th>packaging</th>
+
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for juice in juice_type %}
+                <tr>
+
+                    <td>{{ juice.juice_type }}</td>
+                    <td>{{ juice.ingredients }}</td>
+                    <td>{{ juice.packaging }}</td>
+
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+$('#meter').select2();
+$('#customer').select2();
+</script>
+{% endblock %}

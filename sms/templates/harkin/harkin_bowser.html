@@ -1,0 +1,67 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+{% load filters %}
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>REGISTERED BOWSERS</h3>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'sms:add_bowser' %}" class="btn btn-primary pull-right">Add Bowser</a>
+            </div>
+        </div>
+        <hr>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Reg Number</th>
+                     <th>Company</th>
+                    <th>Driver</th>
+                    <th>Model</th>
+                    <th>Capacity</th>
+                    <th>YOM</th>
+                    <th>Reg Date</th>
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for bowser in harkin_bowser %}
+                <tr>
+                    <td><a href="{% url 'sms:harkin_bowser'  %}">{{ bowser.reg_number }}</a></td>
+                    <td>{{ bowser.bowser_company }}</td>
+
+
+                    <td>{{ bowser.driver }}</td>
+                    <td>{{ bowser.bowser_model }}</td>
+                    <td>{{ bowser.capacity }}</td>
+                    <td>{{ bowser.year_of_manufacture }}</td>
+                    <td>{{ bowser.reg_date |date:'Y-m-d H:i' }}</td>
+
+                 
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

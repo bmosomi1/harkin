@@ -28,7 +28,8 @@
                 <tr>
                     <th>Client Name</th>
                     <th>A/C</th>
-                    <th>Phone Number</th>
+                    <th>Phone 1</th>
+                    <th>Phone 2</th>
                     <th>ID Number</th>
 
                     <th>Court</th>
@@ -37,15 +38,18 @@
                     <th>Amount Due</th>
                     <th>Reg Date</th>
                     <th>Actions</th>
+
                 </tr>
                 </thead>
                 <tbody>
                 {% for client in clients %}
                 <tr>
-                    <td><a href="{% url 'Invoices:client_invoices' client.id %}">{{ client.names }}</a></td>
+                    <td><a href="{% url 'sms:edit_water_client' client.id %}">{{ client.names }}</a></td>
                     <td>{{ client.id }}</td>
                     <td>{{ client.msisdn }}</td>
+                    <td>{{ client.msisdn2 }}</td>
                     <td>{{ client.id_num }}</td>
+
                     <td>{{ client.court }}</td>
                     <td>{{ client.network }}</td>
                     <td>{{ client.last_meter_reading }}</td>
@@ -55,6 +59,7 @@
                         <a href="{% url 'sms:edit_water_client' client.id %}" title="Edit" class="btn btn-outline-primary btn-sm"><i class="fa fa-edit fa-lg"></i></a>
 {#                        <a href="" title="Approve" class="btn btn-outline-primary btn-sm"><i class="fa fa-check-square-o"></i></a>#}
                     </td>
+
                 </tr>
                 {% endfor %}
                 </tbody>

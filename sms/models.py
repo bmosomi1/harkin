@@ -327,6 +327,8 @@ class WaterClient(models.Model):
 class WaterClientAll(models.Model):
     names = models.CharField(max_length=250)
     msisdn = models.CharField(max_length=250)
+    msisdn2 = models.CharField(max_length=250,null=True)
+    meter_number = models.CharField(max_length=250, null=True)
     client_number = models.CharField(max_length=250)
     id_num = models.CharField(max_length=250, null=True)
     meter_num = models.CharField(max_length=250, null=True)
@@ -386,6 +388,7 @@ class WaterMeterReadings(models.Model):
     meter_num = models.CharField(max_length=250, null=True)
     customer_rate = models.CharField(max_length=250, null=True)
     reading_type = models.CharField(max_length=250, null=True)
+    read_by = models.CharField(max_length=250, null=True)
     last_meter_reading_date = models.CharField(max_length=250, null=True)
     comment = models.EmailField(max_length=250, null=True)
     court = models.CharField(max_length=250, null=True)
@@ -483,6 +486,32 @@ class WaterSmsOutNetwork(models.Model):
         verbose_name = 'water_outbox_network'
         verbose_name_plural = 'water_outbox_network'
 
+class MiwamaMpesa(models.Model):
+    timestamp = models.CharField(max_length=250,null=True)
+    sender_phone = models.CharField(max_length=250)
+    msisdn = models.CharField(max_length=250, null=True, default=0)
+    trans_id = models.CharField(max_length=100,unique=True)
+    processed = models.IntegerField(default=0)
+    amount = models.IntegerField( null=True)
+    msisdn = models.CharField(max_length=250, null=True, default=0)
+    paybill = models.CharField(max_length=250, null=True, default=0)
+    account_number = models.CharField(max_length=250, null=True, default=0)
+    names = models.CharField(max_length=250, null=True)
+    allocated_to = models.CharField(max_length=250, null=True)
+    first_name = models.CharField(max_length=250, null=True)
+    last_name = models.CharField(max_length=250, null=True)
+    organizational_balance = models.CharField(max_length=250, null=True)
+    transaction_type = models.CharField(max_length=250, null=True)
+    is_read = models.CharField(max_length=250, null=True)
+    in_date = models.DateTimeField(auto_now_add=True)
+
+
+
+    class Meta:
+        db_table = "mpesa"
+        verbose_name = 'mpesa'
+        verbose_name_plural = 'mpesa'
+
 class WaterSmsOut(models.Model):
     timestamp = models.CharField(max_length=250,null=True)
     user_id = models.IntegerField(null=True)
@@ -550,6 +579,7 @@ class MeterReadings(models.Model):
 class WaterMeterReplacement(models.Model):
     client = models.ForeignKey(WaterClientAll, on_delete=models.CASCADE)
     comments = models.CharField(max_length=250)
+    meter_number = models.CharField(max_length=250, null=True)
     last_units = models.CharField(max_length=250)
     names = models.CharField(max_length=250, null=True)
     amount_due = models.CharField(max_length=250, null=True)
@@ -586,7 +616,19 @@ class WaterPaymentReceivedManual(models.Model):
     comments = models.CharField(max_length=250, null=True)
     pay_date = models.DateTimeField(auto_now_add=True)
 
-
+class WaterPaymentReallocate(models.Model):
+    client = models.ForeignKey(WaterClientAll, on_delete=models.CASCADE)
+    dest_msisdn = models.CharField(max_length=250)
+    received_from = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250, null=True)
+    confirmation_code = models.CharField(max_length=250, null=True)
+    account_number = models.CharField(max_length=250, null=True)
+    account_name = models.CharField(max_length=250, null=True)
+    balance_carried_forward = models.CharField(max_length=250, null=True)
+    processed = models.IntegerField(max_length=4, default=0)
+    ref_id = models.CharField(max_length=250, null=True)
+    comments = models.CharField(max_length=250, null=True)
+    pay_date = models.DateTimeField(auto_now_add=True)
 
 class WaterSystemConfig(models.Model):
     standing_charge = models.CharField(max_length=250)
@@ -723,3 +765,221 @@ class StAnnPatients(models.Model):
     processed = models.BooleanField(default=False)
 
 
+#harkin
+
+
+class HarkinBowserSale(models.Model):
+    bowser_company = models.CharField(max_length=250)
+    bowser_model = models.CharField(max_length=250)
+    reg_number = models.CharField(max_length=250)
+    driver = models.CharField(max_length=250, null=True)
+    capacity = models.CharField(max_length=250, null=True)
+    quantity_bought = models.CharField(max_length=250, null=True)
+    amount = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    amount_due = models.FloatField(default=0.0)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_bowser_sale'
+        verbose_name_plural = 'harkin_bowser_sales'
+
+class HarkinRefillCustomerTypes(models.Model):
+    CustomerType = models.CharField(max_length=250)
+    bowser_model = models.CharField(max_length=250)
+    reg_number = models.CharField(max_length=250)
+    driver = models.CharField(max_length=250, null=True)
+    capacity = models.CharField(max_length=250, null=True)
+    quantity_bought = models.CharField(max_length=250, null=True)
+    amount = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    amount_due = models.FloatField(default=0.0)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_bowser_sale'
+        verbose_name_plural = 'harkin_bowser_sales'
+
+class HarkinShops(models.Model):
+    shop_name = models.CharField(max_length=250)
+    location = models.CharField(max_length=250)
+    shop_manager = models.CharField(max_length=250)
+    phone_number = models.CharField(max_length=250, null=True)
+    shop_till_number = models.CharField(max_length=250, null=True)
+    purchase_amount =  models.FloatField( default=0,null=True)
+    sold_amount =  models.FloatField( default=0,null=True)
+    monthly_rent = models.FloatField(default=0, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    setup_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_shop'
+        verbose_name_plural = 'harkin_shops'
+
+class HarkinJuiceTypes(models.Model):
+    juice_type = models.CharField(max_length=250)
+    ingredients = models.CharField(max_length=250)
+    packaging = models.CharField(max_length=250)
+    comments = models.CharField(max_length=250)
+
+
+    class Meta:
+        verbose_name = 'juice_type'
+        verbose_name_plural = 'juice_types'
+class HarkinWaterRefill(models.Model):
+    client_name = models.CharField(max_length=250)
+    phone = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250)
+    shop_name = models.CharField(max_length=250, null=True)
+    capacity = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_water_Refill'
+        verbose_name_plural = 'harkin_water_Refills'
+class HarkinBottledWater(models.Model):
+    client_name = models.CharField(max_length=250)
+    water_type = models.CharField(max_length=250)
+    phone = models.CharField(max_length=250)
+    quantity = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250)
+    shop_name = models.CharField(max_length=250, null=True)
+    sale_type = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_bottled_water'
+        verbose_name_plural = 'harkin_bottled_waters'
+class HarkinIceCube(models.Model):
+    client_name = models.CharField(max_length=250)
+    location = models.CharField(max_length=250)
+    phone = models.CharField(max_length=250)
+    quantity = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250)
+    shop_name = models.CharField(max_length=250, null=True)
+    sale_type = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_bottled_water'
+        verbose_name_plural = 'harkin_bottled_waters'
+class HarkinIceCubes(models.Model):
+    client_name = models.CharField(max_length=250)
+    phone = models.CharField(max_length=250)
+    quantity = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250)
+    shop_name = models.CharField(max_length=250, null=True)
+    client_location = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_ice_cube'
+        verbose_name_plural = 'harkin_ice_cubes'
+class HarkinJuiceSale(models.Model):
+    client_name = models.CharField(max_length=250)
+    phone = models.CharField(max_length=250)
+    client_type = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250)
+    shop_name = models.CharField(max_length=250, null=True)
+    capacity = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    sale_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_water_Refill'
+        verbose_name_plural = 'harkin_water_Refills'
+
+
+class HarkinFruitPurchase(models.Model):
+    fruit_type = models.CharField(max_length=250)
+    purchased_by = models.CharField(max_length=250)
+    sold_by = models.CharField(max_length=250)
+    amount = models.CharField(max_length=250)
+    shop_name = models.CharField(max_length=250, null=True)
+    capacity = models.CharField(max_length=250, null=True)
+    payment_mode = models.CharField(max_length=250, null=True)
+    payment_reference = models.CharField(max_length=250, null=True)
+    comments = models.EmailField(max_length=250, null=True)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_fruit_purchase'
+        verbose_name_plural = 'harkin_fruit_purchases'
+class BowserCompany(models.Model):
+    names = models.CharField(max_length=250)
+    msisdn = models.CharField(max_length=250)
+    msisdn2 = models.CharField(max_length=250,null=True)
+    meter_number = models.CharField(max_length=250, null=True)
+    client_number = models.CharField(max_length=250)
+    id_num = models.CharField(max_length=250, null=True)
+    meter_num = models.CharField(max_length=250, null=True)
+    customer_rate = models.CharField(max_length=250, null=True)
+    connection_fee = models.CharField(max_length=250, null=True)
+    last_meter_reading_date = models.CharField(max_length=250, null=True)
+    email_address = models.EmailField(max_length=250, null=True)
+    court = models.CharField(max_length=250, null=True)
+    network = models.CharField(max_length=250, null=True)
+    last_meter_reading = models.FloatField(max_length=250, default=0,null=True)
+    amount_due = models.FloatField(max_length=250, default=0,null=True)
+    units_consumed = models.FloatField(max_length=250, default=0,null=True)
+    last_payment_date = models.CharField(max_length=250, null=True)
+    address = models.CharField(max_length=250, null=True)
+    location = models.CharField(max_length=250, null=True)
+    contact_person = models.CharField(max_length=250, null=True)
+    meter_change_date = models.CharField(max_length=250, null=True)
+    connection_fee_paid = models.FloatField(max_length=250, default=0,null=True)
+    message = models.IntegerField(max_length=250, default=0, null=True)
+    amount_0= models.FloatField( default=0,null=True)
+    amount_1 = models.FloatField(default=0, null=True)
+    amount_2 = models.FloatField(default=0, null=True)
+    amount_3 = models.FloatField(default=0, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Water'
+        verbose_name_plural = 'Waters'
+class HarkinBowser(models.Model):
+    #bowser_company = models.ForeignKey(BowserCompany, on_delete=models.CASCADE)
+    bowser_company = models.CharField(max_length=250)
+    bowser_model = models.CharField(max_length=250)
+    reg_number = models.CharField(max_length=250)
+    year_of_manufacture = models.CharField(max_length=250)
+    driver = models.CharField(max_length=250, null=True)
+    capacity = models.CharField(max_length=250, null=True)
+    amount_due = models.FloatField(default=0.0)
+    reg_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_bowser'
+        verbose_name_plural = 'harkin_bowsers'
+
+
+class ClientBowser(models.Model):
+    bowser_model = models.CharField(max_length=250)
+    reg_number = models.CharField(max_length=250)
+    year_of_manufacture = models.CharField(max_length=250)
+    driver = models.CharField(max_length=250, null=True)
+    capacilty = models.CharField(max_length=250, null=True)
+    reg_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'harkin_bowser'
+        verbose_name_plural = 'harkin_bowsers'

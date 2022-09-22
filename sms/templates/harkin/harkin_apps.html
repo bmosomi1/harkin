@@ -1,0 +1,149 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+
+{% block additional_styles %}
+{#<link rel="stylesheet" href="{% static 'css/custom.css' %}">#}
+{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-6 col-lg-3">
+          <div class="widget-small primary coloured-icon"><i class="icon fa fa-phone fa-3x"></i>
+            <div class="info">
+              <h4>Connected Clients</h4>
+              <p><b>{{ water_clients }}</b></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+          <div class="widget-small info coloured-icon"><i class="icon fa fa-users fa-3x"></i>
+            <div class="info">
+              <h4>Water Courts</h4>
+              <p><b>{{ courts }}</b></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="widget-small warning coloured-icon"><i class="icon fa fa-superpowers fa-3x"></i>
+            <div class="info">
+              <h4>Bowsers</h4>
+              <p><b>{{ harkin_bowsers }}</b></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="widget-small danger coloured-icon"><i class="icon fa fa-money fa-3x"></i>
+            <div class="info">
+              <h4>Shops</h4>
+              <p><b>{{ shops }}</b></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div class="row">
+        <div class="col-md-3">
+          <div class="tile">
+                <h3 class="title">Borehole Services</h3>
+{#              <p><a class="btn btn-primary icon-btn" href=""><i class="fa fa-plus"></i>Add Item	</a></p>#}
+              <hr>
+            <div class="tile-body">
+                <h5 class=""> <a href="{%url 'sms:water_clients'%}" class="text-success">Water Clients </a></h5>
+                  <h5 class=""> <a href="{%url 'sms:water_courts'%}" class="text-success">Manage Courts</a></h5>
+            </div>
+               <div class="tile-body">
+                <h5 class=""> <a href="{%url 'sms:meter_readings'%}" class="text-success">Meter Readings</a></h5>
+
+            </div>
+          </div>
+        </div>
+
+
+
+
+        <div class="col-md-3">
+          <div class="tile">
+              <h3 class="title">Bowser Services</h3>
+                <hr>
+{#              <p><a class="btn btn-primary icon-btn" href=""><i class="fa fa-plus"></i>Add Item	</a></p>#}
+            <div class="tile-body">
+                <h5 class=""> <a href="{%url 'sms:bowser_company'%}" class="text-success">Bowser Companies</a></h5>
+                  <h5 class=""> <a href="{%url 'sms:harkin_bowser'%}" class="text-success">Registered Bowsers</a></h5>
+           <h5 class=""> <a href="{%url 'sms:harkin_bowser_sale'%}" class="text-success">Bowser Sales</a></h5>
+
+
+            </div>
+          </div>
+        </div>
+           <div class="col-md-3">
+          <div class="tile">
+              <h3 class="title">Refill Services</h3>
+                <hr>
+{#              <p><a class="btn btn-primary icon-btn" href=""><i class="fa fa-plus"></i>Add Item	</a></p>#}
+            <div class="tile-body">
+                <h5 class=""> <a href="{%url 'sms:harkin_water_refill'%}" class="text-success">Water Refill</a></h5>
+                  <h5 class=""> <a href="{%url 'sms:harkin_shops'%}" class="text-success">Refill Shops</a></h5>
+           <h5 class=""> <a href="" class="text-success">Sales Type</a></h5>
+
+
+            </div>
+          </div>
+        </div>
+
+           <div class="col-md-3">
+          <div class="tile">
+              <h3 class="title">Other Services</h3>
+                <hr>
+{#              <p><a class="btn btn-primary icon-btn" href=""><i class="fa fa-plus"></i>Add Item	</a></p>#}
+            <div class="tile-body">
+                <h5 class=""> <a href="{%url 'sms:juices_dashboard'%}" class="text-success">Juices</a></h5>
+                  <h5 class=""> <a href="{%url 'sms:harkin_bottled_water'%}" class="text-success">Bottled Water</a></h5>
+                  <h5 class=""> <a href="{%url 'sms:harkin_ice_cubes'%}" class="text-success">Ice Cubes</a></h5>
+
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="tile" style="height: 400px;">
+{#                <h3>Customer Reach, Credit Usage Comparison(Demo)</h3>#}
+                <h3>Meter Readings on weekly basis</h3>
+                <hr>
+                <div class="tile-body">
+                    <canvas class="embed-responsive-item" id="barChartDemo" style="width: 475px; height: 100px;"></canvas>
+{#                    <div class="embed-responsive embed-responsive-16by9" style="max-height: 1200px;max-width:1000px;overflow-x: scroll; overflow-y: hidden;">#}
+
+{#                    </div>#}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block additional_scripts %}
+<script>
+var data = {
+      	labels: {{ weeks }},
+      	datasets: [
+      		{
+      			label: "People Reached",
+      			fillColor: "rgb(0,121,9)",
+      			strokeColor: "rgba(220,220,220,1)",
+      			pointColor: "rgba(220,220,220,1)",
+      			pointStrokeColor: "#fff",
+      			pointHighlightFill: "#fff",
+      			pointHighlightStroke: "rgba(220,220,220,1)",
+      			data: {{ messages_sent }}
+      		},
+      	]
+      };
+
+var ctxb = $("#barChartDemo").get(0).getContext("2d");
+      var barChart = new Chart(ctxb).Bar(data);
+</script>
+{% endblock %}

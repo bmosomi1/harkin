@@ -16,9 +16,7 @@
         <div class="col-sm-6">
             <h4>Clients</h4>
         </div>
-        <div class="col-sm-6">
-            <a href="{% url 'sms:create_water_client' %}" class="btn btn-outline-primary pull-right">New Client</a>
-        </div>
+
     </div>
     <hr>
 </div>
@@ -35,7 +33,7 @@
                 <tbody>
                 {% for outgoing in outgoings %}
                 <tr>
-                    <td><a href="{% url 'Invoices:client_invoices' outgoing.id %}">{{ outgoing.dest_msisdn }}</a></td>
+                    <td><a href="#">{{ outgoing.dest_msisdn }}</a></td>
                     <td>{{ outgoing.text_message }}</td>
                     <td>{{ outgoing.out_date|date:'Y:m:d H:m' }}</td>
                     <td>{{ outgoing.delivery_status }}</td>

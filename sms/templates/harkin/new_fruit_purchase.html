@@ -1,0 +1,94 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.css" integrity="sha512-p209YNS54RKxuGVBVhL+pZPTioVDcYPZPYYlKWS9qVvQwrlzxBxkR8/48SCP58ieEuBosYiPUS970ixAfI/w/A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+            </div>
+        </div>
+
+            <form action="{% url 'sms:fruit_purchase' %}" method="post">
+                {% csrf_token %}
+
+                <div class="col-sm-6">
+                    <label>Shop</label>
+                    <select style="width:300px" name="shop" class="form-control" id="shop">
+                        <option value="" style="width:300px">Select Shop</option>
+                        {% for client in shop %}
+                            <option value="{{ client.shop_name }}">{{ client.shop_name }} --{{ client.shop_manager }}</option>
+                        {% endfor %}
+                    </select>
+                    <label>Fruit Type</label>
+                    <input class="form-control" type="text" name="fruit_type"  value="" style="width:300px">
+                     <label>Quantiry</label>
+                    <input class="form-control" type="text" name="quantity"  label="Fruit Quantity" style="width:300px">
+
+
+                </div>
+
+
+                <div class="form-group">
+
+                </div>
+                 <div class="form-group">
+                    <label>Purchase Amount</label>
+                    <input class="form-control" type="text" name="amount"  value="" style="width:300px">
+                </div>
+                 <div class="form-group">
+                    <label>Payment Mode</label>
+                    <input class="form-control" type="text" name="payment_mode"  value="" style="width:300px">
+                </div>
+                 <div class="form-group">
+                    <label>Payment Reference</label>
+                    <input class="form-control" type="text" name="payment_reference"  value="" style="width:300px">
+                </div>
+                <div class="form-group">
+                    <label>Seller Name</label>
+                    <input class="form-control" type="text" name="seller_name"  value="" style="width:300px">
+                </div>
+
+                <div class="form-group">
+                    <label>Received By</label>
+
+                    <select style="width:300px" name="received_by" class="form-control" id="shop">
+                        <option value="" style="width:300px">Select Recepient</option>
+                        {% for client in shop %}
+                            <option value="{{ client.shop_manager }}">{{ client.shop_manager }}</option>
+                        {% endfor %}
+                    </select>
+
+                </div>
+                <div class="form-group">
+                    <label>Comments</label>
+                    <input class="form-control" type="text" name="comments"  value="" style="width:300px">
+                </div>
+
+
+            <button type="submit" class="btn btn-sm btn-outline-primary">Add Purchase</button>
+            </form>
+        </div>
+
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+$('#meter').select2();
+$('#customer').select2();
+</script>
+{% endblock %}

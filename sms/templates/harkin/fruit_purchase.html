@@ -1,0 +1,78 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.css" integrity="sha512-p209YNS54RKxuGVBVhL+pZPTioVDcYPZPYYlKWS9qVvQwrlzxBxkR8/48SCP58ieEuBosYiPUS970ixAfI/w/A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+   <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Purchased Fruits</h3>
+            </div>
+
+            <div class="col-sm-6">
+                <a href="{% url 'sms:new_fruit_purchase' %}" class="btn btn-primary pull-right">New Fruit Purchase</a>
+            </div>
+            <div></div>
+        </div>
+
+
+        </div>
+                <div class="tile-body">
+            <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Fruit Type</th>
+                    <th>Shop</th>
+                    <th>Quantity</th>
+                    <th>Purchase Amount</th>
+                    <th>Seller Name</th>
+                     <th>Reeceived By</th>
+                    <th>Comments</th>
+                     <th>Purchase Date</th>
+
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for juice in fruit_purchase %}
+                <tr>
+
+                    <td>{{ juice.fruit_type }}</td>
+                     <td>{{ juice.shop_name }}</td>
+                    <td>{{ juice.capacity }}</td>
+                    <td>{{ juice.amount }}</td>
+                    <td>{{ juice.sold_by }}</td>
+                    <td>{{ juice.purchased_by }}</td>
+                    <td>{{ juice.comments }}</td>
+                    <td>{{ juice.purchase_date }}</td>
+
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+$('#meter').select2();
+$('#customer').select2();
+</script>
+{% endblock %}

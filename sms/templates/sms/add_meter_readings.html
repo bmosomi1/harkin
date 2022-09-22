@@ -41,6 +41,19 @@
             </form>
         </div>
     </div>
+
+<div hidden>
+    {% if file_path %}
+        <p>{{ file_path }}</p>
+    <a href="../../../{{ file_path }}" id="download">Download</a>
+    {% endif %}
+</div>
+
+<script>
+    document.getElementById("download").click();
+</script>
+
+<meta http-equiv = "refresh" content = "3; url = https://www.qries.com" />
 {% endblock %}
 
 {% block additional_scripts %}

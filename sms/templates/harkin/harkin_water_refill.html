@@ -1,0 +1,72 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+{% load filters %}
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Water Refill Sales</h3>
+            </div>
+            <div class="col-sm-6" hidden>
+                <a href="{% url 'sms:harkin_add_refill_type' %}" class="btn btn-primary pull-right">New Refill Type</a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'sms:harkin_new_refill' %}" class="btn btn-primary pull-right">New Refill</a>
+            </div>
+        </div>
+        <hr>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Client name</th>
+                    <th>Phone</th>
+                    <th>Capacity in litres</th>
+                    <th>Amount</th>
+                    <th>Payment Mode</th>
+                    <th>Payment Reference</th>
+                    <th>Shop</th>
+                    <th>Sale Date</th>
+
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for bowser in water_refill %}
+                <tr>
+
+                    <td>{{ bowser.client_name }}</td>
+                    <td>{{ bowser.phone }}</td>
+                    <td>{{ bowser.capacity }}</td>
+                    <td>{{ bowser.amount }}</td>
+                     <td>{{ bowser.payment_mode }}</td>
+                    <td>{{ bowser.payment_reference }}</td>
+                    <td>{{ bowser.shop_name }}</td>
+                    <td>{{ bowser.sale_date |date:'Y-m-d H:i' }}</td>
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

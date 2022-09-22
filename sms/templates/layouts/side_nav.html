@@ -22,6 +22,7 @@
     {% url 'sms:meter_readings' as meter_readings %}
     {% url 'sms:meter_replacement' as meter_replacement %}
     {% url 'sms:water_payments' as water_payments %}
+    {% url 'sms:water_payments_allocations' as water_payments_allocations %}
     {% url 'sms:water_system_config' as water_system_config %}
 
 {#    {% url 'ShortCode:subs' as subs %}#}
@@ -196,8 +197,16 @@
                 {% else %}
                       class="app-menu__item"
                 {% endif %} href="{{ water_payments }}">
-                    <i class="app-menu__icon fas fa-car"></i>
+                    <i class="app-menu__icon fa fa-mail-forward"></i>
                     <span class="app-menu__label">Payment Received</span></a>
+            </li>
+            <li>
+                <a {% if request.path == water_payments_allocations %} class="app-menu__item active"
+                {% else %}
+                      class="app-menu__item"
+                {% endif %} href="{{ water_payments_allocations }}">
+                    <i class="app-menu__icon fa fa-share"></i>
+                    <span class="app-menu__label">Payment Allocations</span></a>
             </li>
           <!--
             <li>

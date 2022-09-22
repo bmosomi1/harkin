@@ -5,12 +5,12 @@ import json
 from pathlib import Path
 
 import requests
-from celery.task import task, periodic_task
+from celery import shared_task
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from openpyxl import load_workbook, Workbook
-from pip._vendor.pyparsing import pyparsing_common
+#from pip._vendor.pyparsing import pyparsing_common
 from zeep import Client
 
 from io import BytesIO
@@ -42,7 +42,14 @@ def get_last_n_weeks(n):
         i += 1
     return weeks
 
-
+def get_last_n_monther(n):
+    monther = []
+    i = 0
+    while i < n + 1:
+        date = subtract_months(datetime.datetime.today(), i)
+        monther.append(date.isocalendar()[1])
+        i += 1
+    return monther
 def get_last_n_months(n):
     months = []
     i = 0

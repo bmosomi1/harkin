@@ -1,0 +1,77 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+{% load filters %}
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Water Refill Sales</h3>
+            </div>
+            <div class="col-sm-6" hidden>
+                <a href="{% url 'sms:harkin_add_refill_type' %}" class="btn btn-primary pull-right">New Refill Type</a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'sms:harkin_bottled_sale' %}" class="btn btn-primary pull-right">New Water Sale</a>
+            </div>
+        </div>
+        <hr>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Client name</th>
+                    <th>Phone</th>
+                    <th>Sale Type </th>
+                    <th>Water Type </th>
+                     <th>Quantity</th>
+                    <th>Amount</th>
+                    <th>Payment Mode</th>
+                    <th>Payment Reference</th>
+                    <th>Shop</th>
+                    <th>Sale Date</th>
+
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for water in bottled_water %}
+                <tr>
+
+                    <td>{{ water.client_name }}</td>
+                    <td>{{ water.phone }}</td>
+                    <td>{{ water.sale_type }}</td>
+                     <td>{{ water.water_type }}</td>
+
+                    <td>{{ water.quantity }}</td>
+                    <td>{{ water.amount }}</td>
+                     <td>{{ water.payment_mode }}</td>
+                    <td>{{ water.payment_reference }}</td>
+                    <td>{{ water.shop_name }}</td>
+                    <td>{{ water.sale_date |date:'Y-m-d H:i' }}</td>
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

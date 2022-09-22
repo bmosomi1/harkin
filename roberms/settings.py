@@ -26,7 +26,7 @@ SECRET_KEY = '&3kbe*4jj3nchwr6#h28r5@k=0sx&!-1&tb41s7@1%9**zpc(y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-ALLOWED_HOSTS = ['localhost','roberms.co.ke','www.roberms.co.ke']
+ALLOWED_HOSTS = ['miwamawater.roberms.com','176.58.121.115','localhost','roberms.co.ke','109.74.197.229','www.roberms.co.ke','172.105.28.254','172.105.105.208']
 
 
 # Application definition
@@ -84,7 +84,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'roberms.wsgi.application'
+#WSGI_APPLICATION = 'roberms.wsgi.application'
 
 
 # Database
@@ -95,14 +95,14 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-DATABASES2 = {
+DATABASES1 = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mosomi',
-        'USER': 'barongo',
-        'HOST': '172.105.28.254',
+        'NAME': 'miwama',
+        'USER': 'django',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
-        'PASSWORD': 'Mosomi123#',
+        'PASSWORD': 'Mosomi@20301',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }

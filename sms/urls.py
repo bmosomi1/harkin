@@ -1,4 +1,5 @@
-from django.conf.urls import url
+#from django.conf.urls import url
+#from django.conf.urls import include, re_path
 from django.contrib.auth.decorators import login_required
 from django.urls import path
 
@@ -36,7 +37,9 @@ urlpatterns = [
     path('customer/contacts', views.customer_contacts, name='customer_contacts'),
     path('water/clients', views.water_clients, name='water_clients'),
     path('water/payments', views.water_payments, name='water_payments'),
+    path('water/payments/<int:client_id>', views.water_payments_clients, name='water_payments_clients'),
     path('water/payments/manual', views.water_manual_payments, name='water_manual_payments'),
+    path('water/payments/allocations', views.water_payments_allocations, name='water_payments_allocations'),
     path('water/courts', views.water_courts, name='water_courts'),
     #path('water/courts/network', views.water_courts_network, name='water_courts_network'),
     path('create/water/network', views.create_water_network, name='create_water_network'),
@@ -44,7 +47,28 @@ urlpatterns = [
     path('edit/sysconf/<int:client_id>', views.edit_sys_config, name='edit_sys_config'),
     #path('client_invoices/<int:client_id>', views.client_invoices, name='client_invoices'),
     path('meter/readings', views.meter_readings, name='meter_readings'),
+    path('harkin/bowser', views.harkin_bowser, name='harkin_bowser'),
+    path('harkin/shops', views.harkin_shops, name='harkin_shops'),
+    path('harkin/bowser/sale', views.harkin_bowser_sale, name='harkin_bowser_sale'),
+    path('harkin/new/refill', views.harkin_new_refill, name='harkin_new_refill'),
+    path('harkin/bottled/water/sale', views.harkin_bottled_sale, name='harkin_bottled_sale'),
+    path('harkin/ice/sale', views.harkin_ice_sale, name='harkin_ice_sale'),
+    path('harkin/new/juice/sale', views.harkin_new_juice_sale, name='harkin_new_juice_sale'),
+    path('harkin/add/bowser/sale', views.harkin_add_bowser_sale, name='harkin_add_bowser_sale'),
+    path('harkin/water/refill', views.harkin_water_refill, name='harkin_water_refill'),
+    path('harkin/add/refill/type', views.harkin_add_refill_type, name='harkin_add_refill_type'),
+    path('harkin/juice/type', views.juice_type, name='juice_type'),
+    path('harkin/fruit/purchase', views.fruit_purchase, name='fruit_purchase'),
+    path('harkin/new/fruit/purchase', views.new_fruit_purchase, name='new_fruit_purchase'),
+    path('harkin/bottled/water', views.harkin_bottled_water, name='harkin_bottled_water'),
+    path('harkin/ice/cubes', views.harkin_ice_cubes, name='harkin_ice_cubes'),
+    path('juices/dashboard', views.juices_dashboard, name='juices_dashboard'),
+    path('meter/readings/<int:client_id>', views.meter_readings_clients, name='meter_readings_clients'),
     path('add/meter', views.add_meter, name='add_meter'),
+    path('add/bowser', views.add_bowser, name='add_bowser'),
+    path('add/shop', views.add_shop, name='add_shop'),
+    path('bowser/company', views.bowser_company, name='bowser_company'),
+    path('bowser/add/company', views.create_bowser_company, name='create_bowser_company'),
     path('add/meter/readings', views.add_meter_readings, name='add_meter_readings'),
     #path('meter/readings/report/<int:report_value>', views.meter_readings_report, name='meter_readings_report'),
     #path('meter/readings/report', views.meter_readings_report, name='meter_readings_report'),
@@ -89,6 +113,7 @@ urlpatterns = [
     path('smsreport', views.SmsReportView.as_view(), name='sms-simple'),
     path('sms/reports', views.sms_reports, name='my_sms_reports'),
     path('water/sent/sms', views.water_sent_sms, name='water_sent_sms'),
+    path('water/sent/sms/<str:client_phone>', views.water_sent_sms_client, name='water_sent_sms_client'),
     # path('send/sms', views.send_sms, name='send_sms'),
     # path('get/sms/delivery/status', views.get_delivery_status, name='get_delivery_status'),
 

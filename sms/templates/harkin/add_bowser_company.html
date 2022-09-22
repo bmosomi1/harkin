@@ -1,0 +1,75 @@
+{% extends 'layouts/new_base.html' %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+{#    <div class="app-title">#}
+{#        <div>#}
+{#          <h1><i class="fa fa-dashboard"></i> Dashboard</h1>#}
+{#            <h2>Welcome, <strong> {{request.user.username}} </strong></h2>#}
+{#          <p></p>#}
+{#        </div>#}
+{#        <ul class="app-breadcrumb breadcrumb">#}
+{#          <li class="breadcrumb-item"><i class="fa fa-home fa-lg"></i></li>#}
+{#          <li class="breadcrumb-item"><a href="#">Create Contact</a></li>#}
+{#        </ul>#}
+{#      </div>#}
+<div class="row">
+        <div class="col-md-12">
+          <div class="tile">
+            <h3 class="tile-title">Add Bowser Company</h3>
+            <div class="tile-body">
+              <form action="{% url 'sms:create_bowser_company' %}" method="post">
+                  {% csrf_token %}
+                <div class="form-group">
+                  <label class="control-label">Company Name:</label>
+                  <input class="form-control" name="names" type="text" placeholder="Enter Client names" required>
+                </div>
+                  <div class="form-group">
+                  <label class="control-label">Contact Person</label>
+                  <input class="form-control" name="contact_person" type="text" placeholder="Contact Person" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="control-label">Contact Phone Number</label>
+                  <input class="form-control" name="msisdn" type="text" placeholder="Phone Number" required>
+                </div>
+                   <div class="form-group">
+                    <label>Driver Name</label>
+                    <input class="form-control" type="text" name="driver">
+                </div>
+                  <div class="form-group">
+                  <label class="control-label">Location</label>
+                  <input class="form-control" name="location" type="text" placeholder="Location" >
+                </div>
+
+                <div class="form-group">
+                  <label class="control-label">Address:</label>
+                  <input class="form-control" name="address" type="text" placeholder="Address">
+                </div>
+
+
+{#                <div class="form-group">#}
+{#                  <label class="control-label">Contact Name</label>#}
+{#                  <input class="form-control" name="name" type="text" placeholder="Enter Group Name">#}
+{#                </div>  #}
+                  <button class="btn btn-outline-success" type="submit"><i class="fa fa-fw fa-lg fa-check-circle"></i>Submit</button>
+              </form>
+            </div>
+            <div class="tile-footer">
+            </div>
+          </div>
+        </div>
+
+
+
+</div>
+
+
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

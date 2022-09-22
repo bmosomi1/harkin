@@ -1,0 +1,131 @@
+{% extends 'layouts/new_base.html' %}
+{% load static %}
+
+{% block additional_meta %}
+
+{% endblock %}
+
+{% block additional_styles %}
+
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12">
+       <div class="tile">
+{#           <div class="page-header">#}
+{#               <div class="row">#}
+                   <div class="tile-title">
+
+                   </div>
+{#               </div>#}
+{#           </div>#}
+
+       <div class="row">
+           <div class="col-lg-4">
+           <div class="bs-component">
+           <div class="card border-success">
+               <div class="card-header">
+                   <h5 class="mb-3" id="buttons">Juice Sales</h5>
+               </div>
+               <div class="card-body">
+                   <p></p>
+                   <a class="btn btn-outline-success" href="{% url 'sms:harkin_new_juice_sale' %}">Continue</a>
+               </div>
+           </div>
+           </div>
+       </div>
+
+
+       <div class="col-lg-4">
+           <div class="card border-success">
+               <div class="bs-component">
+                   <div class="card-header">
+                   <h5 class="mb-3" id="buttons">Juice Types</h5>
+                   </div>
+               <div class="card-body">
+                   <p></p>
+                   <a class="btn btn-outline-success" href="{% url 'sms:juice_type' %}">Continue</a>
+               </div>
+               </div>
+           </div>
+       </div>
+
+            <div class="col-lg-4">
+           <div class="card border-success">
+               <div class="bs-component">
+                   <div class="card-header">
+                   <h5 class="mb-3" id="buttons">Fruits Purchase</h5>
+                   </div>
+               <div class="card-body">
+                   <p></p>
+                   <a class="btn btn-outline-success" href="{% url 'sms:fruit_purchase' %}">Continue</a>
+               </div>
+               </div>
+           </div>
+
+       </div>
+
+       </div>
+
+    <div class="tile">
+        <div class="tile-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <h3>Juice Sales</h3>
+            </div>
+            <div class="col-sm-6" hidden>
+                <a href="{% url 'sms:harkin_add_refill_type' %}" class="btn btn-primary pull-right">New Refill Type</a>
+            </div>
+            <div class="col-sm-6">
+                <a href="{% url 'sms:harkin_new_juice_sale' %}" class="btn btn-primary pull-right">New Sale</a>
+            </div>
+        </div>
+        <hr>
+
+            <div class="row">
+                <div class="col-sm-12">
+                    <table class="table table-hover table-bordered" id="sampleTable">
+                <thead>
+                <tr>
+                    <th>Client name</th>
+                    <th>Client Type</th>
+                    <th>Phone</th>
+                    <th>Capacity in litres</th>
+                    <th>Amount</th>
+                    <th>Payment Mode</th>
+                    <th>Payment Reference</th>
+                    <th>Shop</th>
+                    <th>Sale Date</th>
+
+
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for juice in juice_sale %}
+                <tr>
+
+                    <td>{{ juice.client_name }}</td>
+                    <td>{{ juice.client_type }}</td>
+                    <td>{{ juice.phone }}</td>
+                    <td>{{ juice.capacity }}</td>
+                    <td>{{ juice.amount }}</td>
+                     <td>{{ juice.payment_mode }}</td>
+                    <td>{{ juice.payment_reference }}</td>
+                    <td>{{ juice.shop_name }}</td>
+                    <td>{{ juice.sale_date |date:'Y-m-d H:i' }}</td>
+
+
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block additional_scripts %}
+
+{% endblock %}

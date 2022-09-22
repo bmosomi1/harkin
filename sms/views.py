@@ -5,9 +5,10 @@ from pprint import pprint
 import datetime
 import time
 import xlsxwriter
+from django.db.models import Sum
 
 from celery.result import AsyncResult
-from celery.task import task
+#from celery.task import task
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -21,7 +22,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
-from django.utils.encoding import force_bytes, force_text
+from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import CreateView, ListView
@@ -77,7 +78,7 @@ class Merged:
 
 # @login_required()
 def home(request):
-    return render(request, 'sms/sample_home.html')
+    return render(request, 'sms/sample_water.html')
 
 
 def about(request):
@@ -90,6 +91,76 @@ def water_apps(request):
     if customer is None:
         customer = CustomerSubAccounts.objects.filter(user_ptr_id=request.user.id).first().owner
         weeks = get_last_n_weeks(12)
+        months = get_last_n_months(12)
+        one_month_ago = datetime.datetime.today() - datetime.timedelta(days=30)
+        current_day = datetime.datetime.today()
+        credit_usage = []
+        for week in months:
+            # print(week)
+            messages = WaterMeterReadings.objects.filter(read_date__gte=one_month_ago, read_date__lte=current_day).count()
+            credit_usage.append(messages)
+            current_day = current_day - datetime.timedelta(days=7)
+            one_month_ago = one_month_ago - datetime.timedelta(days=30)
+        # print(credit_usage)
+        context = {
+            'messages_sent': credit_usage[::-1],
+            'weeks': weeks[::-1],
+            'months': months[::-1],
+            'customer': customer,
+            'contacts': Contact.objects.filter(group__customer_id=customer.id).count(),
+            'water_clients': WaterClientAll.objects.filter().count(),
+            'harkin_bowsers': HarkinBowser.objects.filter().count(),
+            'groups': Group.objects.filter(customer_id=customer.id).count(),
+            'admins': CustomerSubAccounts.objects.filter(owner=customer.id).count()+1
+        }
+        return render(request, 'harkin/harkin_apps.html', context)
+    else:
+        months = get_last_n_monther(12)
+        weeks = get_last_n_weeks(20)
+        one_month_ago = datetime.datetime.today() - datetime.timedelta(days=30)
+        current_day = datetime.datetime.today()
+        credit_usage = []
+        for week in weeks:
+            #print(month)
+            #ModelName.objects.aggregate(Sum('field_name'))
+            readings = WaterMeterReadings.objects.filter(read_date__gte=one_month_ago,
+                                                         read_date__lte=current_day).count()
+            #readings = WaterMeterReadings.objects.filter(read_date__gte=one_month_ago,
+             #                                           read_date__lte=current_day).aggregate(Sum('units_consumed'))
+
+            credit_usage.append(readings)
+            current_day = current_day - datetime.timedelta(days=7)
+            one_month_ago = one_month_ago - datetime.timedelta(days=30)
+        # print(credit_usage)
+        context = {
+            'messages_sent': credit_usage[::-1],
+            'weeks': weeks[::-1],
+            'months': months[::-1],
+            'customer': customer,
+            'contacts': Contact.objects.filter(group__customer_id=customer.id).count(),
+            'water_clients': WaterClientAll.objects.filter().count(),
+            'groups': Group.objects.filter(customer_id=customer.id).count(),
+            'courts': WaterCourt.objects.filter().count(),
+            'readings': WaterMeterReadings.objects.filter().count(),
+            'outbox': WaterMeterReadings.objects.filter().count(),
+            'harkin_bowsers': HarkinBowser.objects.filter().count(),
+            'unallocated_payments': MiwamaMpesa.objects.filter(processed=2).count(),
+            'shops': HarkinShops.objects.filter().count(),
+            'admins': CustomerSubAccounts.objects.filter(owner=customer.id).count() + 1
+        }
+        return render(request, 'harkin/harkin_apps.html', context)
+@login_required()
+@is_user_customer
+
+
+@login_required()
+@is_user_customer
+def water_apps_orig(request):
+    customer = Customer.objects.filter(user_ptr_id=request.user.id).first()
+    if customer is None:
+        customer = CustomerSubAccounts.objects.filter(user_ptr_id=request.user.id).first().owner
+        weeks = get_last_n_weeks(12)
+        months = get_last_n_weeks(12)
         one_week_ago = datetime.datetime.today() - datetime.timedelta(days=7)
         current_day = datetime.datetime.today()
         credit_usage = []
@@ -307,7 +378,7 @@ def send(request):
             return render(request, 'sms/simple_message.html', context)
 
 
-@task
+#@task
 def simple_sms_store(customer_id, total_message_cost, data, track_code):
     customer = Customer.objects.filter(id=customer_id).first()
     new_credit = customer.credit - total_message_cost
@@ -828,6 +899,12 @@ def water_payments(request):
         'payments': payments
     }
     return render(request, 'sms/water_payments.html', context)
+def water_payments_clients(request,client_id):
+    payments = WaterPaymentReceived.objects.filter(account_number=client_id)
+    context = {
+        'payments': payments
+    }
+    return render(request, 'sms/water_payments.html', context)
 
 def client_invoices(request, client_id):
     client = Client.objects.get(id=client_id)
@@ -841,9 +918,22 @@ def client_invoices(request, client_id):
 
 def edit_water_client(request, client_id):
     client = WaterClientAll.objects.get(id=client_id)
+    #WaterMeterReadings.objects.all().delete()
+    #WaterPaymentReceived.objects.all().delete()
+    #WaterPaymentReceivedManual.objects.all().delete()
+    #WaterOutbox.objects.all().delete()
+    #WaterMeterReplacement.objects.all().delete()
+    #WaterPaymentReallocate.objects.all().delete()
+
     if request.method == 'POST':
         client.names = request.POST['names']
-        client.msisdn = request.POST['msisdn']
+        #client.msisdn = request.POST['msisdn']
+        phones = request.POST['msisdn']
+        phones2 = request.POST['msisdn2']
+        phone_number = f"{0}{phones.replace(' ', '')[-9:]}"
+        phone_number2 = f"{0}{phones2.replace(' ', '')[-9:]}"
+        client.msisdn = phone_number
+        client.msisdn2 = phone_number2
         client.court = request.POST['court']
         client.email_address = request.POST['email_address']
         client.last_meter_reading = int(float(request.POST['last_meter_reading']))
@@ -891,6 +981,464 @@ def meter_readings(request):
     }
     return render(request, 'sms/water_meter_readings.html', context)
 
+@login_required()
+def juices_dashboard(request):
+    juice_sales = HarkinJuiceSale.objects.all()
+    context = {
+        'juice_sale': juice_sales
+    }
+    return render(request, 'harkin/juices_dashboard.html',context)
+
+
+def harkin_add_refill_type(request):
+    if request.method == 'POST':
+        refill_type = request.POST['refill_type']
+        message = request.POST['message']
+        customer = customer=Customer.objects.filter(user_ptr_id=request.user.id).first()
+        if customer is not None:
+            Till_Numbers.objects.create(
+                customer=customer,
+                till=till_number,
+                message=message
+            )
+        else:
+            customer = CustomerSubAccounts.objects.filter(user_ptr_id=request.user.id).first().owner
+            if customer is not None:
+                Till_Numbers.objects.create(
+                    customer=customer,
+                    till=till_number,
+                    message=message
+                )
+        return redirect('sms:customer_till_numbers')
+    return render(request, 'till_numbers/add_till_number.html')
+def harkin_add_shop(request):
+    if request.method == 'POST':
+        refill_type = request.POST['refill_type']
+        message = request.POST['message']
+        customer = customer=Customer.objects.filter(user_ptr_id=request.user.id).first()
+        if customer is not None:
+            Till_Numbers.objects.create(
+                customer=customer,
+                till=till_number,
+                message=message
+            )
+        else:
+            customer = CustomerSubAccounts.objects.filter(user_ptr_id=request.user.id).first().owner
+            if customer is not None:
+                Till_Numbers.objects.create(
+                    customer=customer,
+                    till=till_number,
+                    message=message
+                )
+        return redirect('sms:customer_till_numbers')
+    return render(request, 'till_numbers/add_till_number.html')
+def harkin_bowser_sale(request):
+    meter_readings = HarkinBowserSale.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'meter_readings': meter_readings
+    }
+    return render(request, 'harkin/harkin_bowser_sale.html', context)
+
+def harkin_water_refill(request):
+    water_refill = HarkinWaterRefill.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'water_refill': water_refill
+    }
+    return render(request, 'harkin/harkin_water_refill.html', context)
+def harkin_bottled_water(request):
+    bottled_water = HarkinBottledWater.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'bottled_water': bottled_water
+    }
+    return render(request, 'harkin/harkin_bottled_water.html', context)
+
+def harkin_ice_cubes(request):
+    ice_cubes = HarkinIceCube.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'ice_cubes': ice_cubes
+    }
+    return render(request, 'harkin/harkin_ice_cubes.html', context)
+def harkin_bowser(request):
+    harkin_bowser = HarkinBowser.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'harkin_bowser': harkin_bowser
+    }
+    return render(request, 'harkin/harkin_bowser.html', context)
+def harkin_shops(request):
+    harkin_shops = HarkinShops.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'harkin_shops': harkin_shops
+    }
+    return render(request, 'harkin/harkin_shops.html', context)
+def bowser_company(request):
+    clients = BowserCompany.objects.all()
+    context = {
+        'clients': clients
+    }
+    return render(request, 'harkin/bowser_company.html', context)
+
+def create_bowser_company(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            names = request.POST['names']
+            contact_person = request.POST['contact_person']
+            #phone_number = request.POST['phone_number']
+            location = request.POST['location']
+            address = request.POST['address']
+            #customer_number = 'HK-100'
+
+
+            cn = last_client.client_number
+            cn_int = int(cn.split('HK-')[-1])
+            new_cn_int = cn_int + 1
+            new_cn = f"HK-{new_cn_int}"
+            customer_number = new_cn
+            phones = request.POST['msisdn']
+            #phones2 = request.POST['msisdn2']
+            phone_number = f"{0}{phones.replace(' ', '')[-9:]}"
+            #phone_number2 = f"{0}{phones2.replace(' ', '')[-9:]}"
+            BowserCompany.objects.update_or_create(
+                names=names,
+                msisdn=phone_number,
+                location=location,
+                address=address,
+                client_number=customer_number,
+                contact_person=contact_person
+
+
+            )
+        messages.success(request, 'Bowser company Added Successfully')
+        return redirect('sms:bowser_company')
+    context = {
+        'bowser': BowserCompany.objects.filter().order_by('names')
+    }
+    return render(request, 'harkin/add_bowser_company.html', context)
+def harkin_new_refill(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            customer = request.POST['customer']
+            shop = request.POST['shop']
+            payment_mode = request.POST['payment_mode']
+            quantity = request.POST['quantity']
+            amount = request.POST['amount']
+            payment_reference = request.POST['payment_reference']
+            comment = request.POST['comment']
+            phone = request.POST['phone']
+            #payment_mode = request.POST['payment_mode']
+            #customer_number = 'HK-100'
+
+
+            HarkinWaterRefill.objects.update_or_create(
+                client_name=customer,
+                phone=phone,
+                amount=amount,
+                shop_name=shop,
+                capacity=quantity,
+                payment_mode=payment_mode,
+                payment_reference=payment_reference,
+                comments=comment
+
+
+            )
+        messages.success(request, 'Water Refill Added Successfully')
+        return redirect('sms:harkin_water_refill')
+    context = {
+        'shop': HarkinShops.objects.filter().order_by('shop_name')
+    }
+    return render(request, 'harkin/add_water_refill.html', context)
+def harkin_bottled_sale(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            customer = request.POST['customer']
+            shop = request.POST['shop']
+            payment_mode = request.POST['payment_mode']
+            quantity = request.POST['quantity']
+            amount = request.POST['amount']
+            payment_reference = request.POST['payment_reference']
+            comment = request.POST['comment']
+            phone = request.POST['phone']
+            water_type = request.POST['water_type']
+            sale_type = request.POST['sale_type']
+            #payment_mode = request.POST['payment_mode']
+            #customer_number = 'HK-100'
+
+
+            HarkinBottledWater.objects.update_or_create(
+                client_name=customer,
+                phone=phone,
+                amount=amount,
+                shop_name=shop,
+                quantity=quantity,
+                payment_mode=payment_mode,
+                payment_reference=payment_reference,
+                water_type=water_type,
+                sale_type=sale_type,
+                comments=comment
+
+
+            )
+        messages.success(request, water_type)
+        return redirect('sms:harkin_bottled_water')
+    context = {
+        'shop': HarkinShops.objects.filter().order_by('shop_name')
+    }
+    return render(request, 'harkin/add_bottled_water_sale.html', context)
+
+def harkin_ice_sale(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            customer = request.POST['customer']
+            shop = request.POST['shop']
+            payment_mode = request.POST['payment_mode']
+            quantity = request.POST['quantity']
+            amount = request.POST['amount']
+            payment_reference = request.POST['payment_reference']
+            comment = request.POST['comment']
+            phone = request.POST['phone']
+            location = request.POST['location']
+            sale_type = request.POST['sale_type']
+
+            #payment_mode = request.POST['payment_mode']
+            #customer_number = 'HK-100'
+
+
+            HarkinIceCube.objects.update_or_create(
+                client_name=customer,
+                phone=phone,
+                amount=amount,
+                shop_name=shop,
+                quantity=quantity,
+                sale_type=sale_type,
+                payment_mode=payment_mode,
+                location=location,
+                payment_reference=payment_reference,
+                comments=comment
+
+
+            )
+        messages.success(request, customer)
+        return redirect('sms:harkin_ice_cubes')
+    context = {
+        'shop': HarkinShops.objects.filter().order_by('shop_name')
+    }
+    return render(request, 'harkin/add_ice_cube_sale.html', context)
+
+def juice_type(request):
+
+    if request.method == 'POST':
+        juice_type = request.POST['juice_type']
+        packaging = request.POST['packaging']
+        ingredients = request.POST['ingredients']
+        comments = request.POST['comments']
+
+
+
+
+
+
+        HarkinJuiceTypes.objects.create(
+            juice_type=juice_type,
+            packaging=packaging,
+            comments=comments,
+            ingredients=ingredients,
+
+
+        )
+
+
+        messages.success(request, 'Juice Type Successfully')
+        return redirect('sms:juice_type')
+    else:
+        context = {
+            'juice_type': HarkinJuiceTypes.objects.filter().order_by('juice_type')
+        }
+        return render(request, 'harkin/juice_type.html', context)
+
+def fruit_purchase(request):
+
+    if request.method == 'POST':
+        fruit_type = request.POST['fruit_type']
+        purchased_by = request.POST['received_by']
+        sold_by = request.POST['seller_name']
+        amount = request.POST['amount']
+        shop_name = request.POST['shop']
+        capacity = request.POST['quantity']
+        payment_mode = request.POST['payment_mode']
+        payment_reference = request.POST['payment_reference']
+        comments = request.POST['comments']
+
+
+        HarkinFruitPurchase.objects.create(
+            fruit_type=fruit_type,
+            purchased_by=purchased_by,
+            comments=comments,
+            sold_by=sold_by,
+            amount=amount,
+            shop_name=shop_name,
+            capacity=capacity,
+            payment_reference=payment_reference,
+            #comments=comments,
+            payment_mode=payment_mode
+
+
+        )
+
+
+        messages.success(request, 'fruit purchase added')
+        return redirect('sms:fruit_purchase')
+    else:
+        context = {
+            'fruit_purchase': HarkinFruitPurchase.objects.filter().order_by('-id')
+        }
+        return render(request, 'harkin/fruit_purchase.html', context)
+
+def new_fruit_purchase(request):
+
+    if request.method == 'POST':
+        fruit_type = request.POST['fruit_type']
+        purchased_by = request.POST['received_by']
+        sold_by = request.POST['seller_name']
+        amount = request.POST['amount']
+        shop_name = request.POST['shop']
+        capacity = request.POST['quantity']
+        payment_mode = request.POST['payment_mode']
+        payment_reference = request.POST['payment_reference']
+        comments = request.POST['comments']
+
+
+        HarkinFruitPurchase.objects.create(
+            fruit_type=fruit_type,
+            purchased_by=purchased_by,
+            comments=comments,
+            sold_by=sold_by,
+            amount=amount,
+            shop_name=shop_name,
+            capacity=capacity,
+            payment_reference=payment_reference,
+            #comments=comments,
+            payment_mode=payment_mode
+
+
+        )
+
+
+        messages.success(request, 'fruit purchase added')
+        return redirect('sms:fruit_purchase')
+    else:
+        context = {
+            'shop': HarkinShops.objects.filter().order_by('shop_name'),
+            'fruit_purchase': HarkinFruitPurchase.objects.filter().order_by('-id')
+        }
+        return render(request, 'harkin/new_fruit_purchase.html', context)
+def harkin_new_juice_sale(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            customer = request.POST['customer']
+            shop = request.POST['shop']
+            payment_mode = request.POST['payment_mode']
+            quantity = request.POST['quantity']
+            amount = request.POST['amount']
+            payment_reference = request.POST['payment_reference']
+            comment = request.POST['comment']
+            phone = request.POST['phone']
+            client_type = request.POST['client_type']
+            #customer_number = 'HK-100'
+
+
+            HarkinJuiceSale.objects.update_or_create(
+                client_name=customer,
+                phone=phone,
+                amount=amount,
+                client_type=client_type,
+                shop_name=shop,
+                capacity=quantity,
+                payment_mode=payment_mode,
+                payment_reference=payment_reference,
+                comments=comment
+
+
+            )
+        messages.success(request, 'Juice Added Successfully')
+        context = {
+
+            'juice_sales': HarkinJuiceSale.objects.filter().order_by('-id')
+        }
+        return redirect('sms:juices_dashboard')
+    context = {
+        'shop': HarkinShops.objects.filter().order_by('shop_name'),
+        'juice_type': HarkinJuiceTypes.objects.filter().order_by('juice_type'),
+        'juice_sales': HarkinJuiceSale.objects.filter().order_by('-id')
+    }
+    return render(request, 'harkin/add_juice_sale.html', context)
+
+def meter_readings_clients(request,client_id):
+    meter_readings = WaterMeterReadings.objects.filter(account_number=client_id)
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'meter_readings': meter_readings
+    }
+    return render(request, 'sms/water_meter_readings.html', context)
+
+
+def bowser_companies(request):
+    bowser_company = bowser_company.objects.all()
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'bowser_company': bowser_company
+    }
+    return render(request, 'harkin/bowser_company.html', context)
+def meter_readings_clients(request,client_id):
+    meter_readings = WaterMeterReadings.objects.filter(account_number=client_id)
+    #meter_readingss = WaterMeterReadings.objects.all().delete()
+
+    context = {
+        'meter_readings': meter_readings
+    }
+    return render(request, 'sms/water_meter_readings.html', context)
 def import_meter_readings(request):
     if request.method == 'POST':
         #customer = Customer.objects.filter(user_ptr_id=request.user.id).first()
@@ -910,11 +1458,11 @@ def import_meter_readings(request):
             workbook = load_workbook(filename=f_path, read_only=True)
             worksheet = workbook[workbook.sheetnames[0]]
             for i in range(2, worksheet.max_row + 1):
-                if worksheet.cell(row=i, column=3).value != 0:
+                if worksheet.cell(row=i, column=4).value != 0:
 
                     account_number = worksheet.cell(row=i, column=1).value
                     name = worksheet.cell(row=i, column=2).value
-                    readings = (worksheet.cell(row=i, column=3).value)
+                    readings = (worksheet.cell(row=i, column=4).value)
                     #readings = float(worksheet.cell(row=i, column=3).value)
                     #readings = str(worksheet.cell(row=i, column=2).value)
 
@@ -957,7 +1505,7 @@ def import_meter_readings(request):
             return redirect('sms:contacts_upload_status', s.id)
 
 
-@task()
+#@task()
 def store_meter_readings_task():
     WaterMeterReadings.objects.update_or_create(
         names="Benard Barongo",
@@ -1072,6 +1620,222 @@ def add_meter_readings(request):
 
         #return render(request, 'sms/add_meter_readings.html', context)
         return render(request, 'sms/add_meter.html', context)
+
+
+def add_bowser1(request):
+
+    if request.method == 'POST':
+        reg_number = request.POST['reg_number'],
+        year_of_manufacture = request.POST['year_of_manufacture'],
+        bowser_model=request.POST['bowser_model'],
+        contact_person = request.POST['contact_person'],
+        company_id = int(request.POST['client']),
+        #customer = Customer.objects.filter(user_ptr_id=request.user.id).first(),
+        #company = BowserCompany.objects.filter(id=request.user.id).first(),
+        driver = request.POST['driver'],
+        capacity = int(request.POST['capacity'])
+
+
+
+        if capacity>0:
+
+
+
+
+            HarkinBowser.objects.create(
+                capacity=capacity,
+                #bowser_company=company,
+                reg_number=reg_number,
+                bowser_model=contact_person,
+                year_of_manufacture=year_of_manufacture,
+
+
+
+
+            )
+
+
+
+            messages.success(request,  contact_person)
+            return redirect('sms:harkin_bowser')
+        else:
+            print("Invalid ")
+            clienter = HerkinBowser.objects.all()
+            context = {
+                'bowser': bowser
+            }
+            return render(request, 'harkin/add_bowser.html', context)
+    else:
+
+        clienter = BowserCompany.objects.all()
+        context = {
+            'clients': clienter
+        }
+
+        #return render(request, 'sms/add_meter_readings.html', context)
+        return render(request, 'harkin/add_bowser.html', context)
+
+
+
+def harkin_add_bowser_sale(request):
+
+    if request.method == 'POST':
+        amount = request.POST['amount']
+        payment_mode = request.POST['payment_mode']
+        reference = request.POST['reference']
+        comment = request.POST['comment']
+        quantity = request.POST['quantity']
+        bowser_id = request.POST['client']
+
+
+
+
+
+
+
+
+        q = HarkinBowser.objects.filter(id=bowser_id)
+        model = q[0].bowser_model
+        reg_number = q[0].reg_number
+        driver = q[0].driver
+        capacity = int(q[0].capacity)
+        amount_due = q[0].amount_due
+        bowser_company = q[0].bowser_company
+
+
+
+        if capacity>0:
+
+            HarkinBowserSale.objects.create(
+                bowser_company=bowser_company,
+                reg_number=reg_number,
+                driver=driver,
+                capacity=capacity,
+                quantity_bought=quantity,
+                amount=amount,
+                amount_due=amount_due,
+                payment_reference=reference,
+                comments=comment,
+                payment_mode=payment_mode
+
+
+
+
+            )
+
+
+
+            messages.success(request,  reg_number)
+            return redirect('sms:harkin_bowser_sale')
+        else:
+            print("Invalid readings")
+            messages.success(request, "Invalid")
+            clienter = WaterClientAll.objects.all()
+            context = {
+                'clients': clienter
+            }
+            return render(request, 'harkin/harkin_add_bowser_sale.html', context)
+    else:
+
+        clienter = HarkinBowser.objects.all()
+        context = {
+            'clients': clienter
+        }
+
+        #return render(request, 'sms/add_meter_readings.html', context)
+        return render(request, 'harkin/harkin_add_bowser_sale.html', context)
+def add_shop(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            shop_name = request.POST['shop_name']
+            location = request.POST['location']
+            shop_manager = request.POST['shop_manager']
+            phone_number = request.POST['phone_number']
+            shop_till_number = request.POST['shop_till_number']
+            monthly_rent = request.POST['monthly_rent']
+            comments = request.POST['comments']
+
+
+            HarkinShops.objects.update_or_create(
+                shop_name=shop_name,
+                location=location,
+                shop_manager=shop_manager,
+                phone_number=phone_number,
+                shop_till_number=shop_till_number,
+                monthly_rent=monthly_rent,
+                comments=comments
+
+
+
+
+            )
+        messages.success(request, shop_name)
+        return redirect('sms:harkin_shops')
+
+
+    clienter = HarkinShops.objects.all()
+    context = {
+        'clients': clienter
+    }
+    return render(request, 'harkin/create_shop.html', context)
+def add_bowser(request):
+    if request.method == 'POST':
+        customer_number = ''
+        last_client = BowserCompany.objects.all().order_by('id').last()
+        #last_client = '1'
+        if not last_client:
+            customer_number = 'HK-100'
+        else:
+            #cn = 'RB-400'
+            driver = request.POST['driver']
+            company_id = request.POST['client']
+            capacity = request.POST['capacity']
+            yom = request.POST['yom']
+            reg_number = request.POST['reg_number']
+            bowser_model = request.POST['bowser_model']
+
+
+
+            cn = last_client.client_number
+            cn_int = int(cn.split('HK-')[-1])
+            new_cn_int = cn_int + 1
+            new_cn = f"HK-{new_cn_int}"
+            customer_number = new_cn
+            #phones = request.POST['msisdn']
+            #phones2 = request.POST['msisdn2']
+            #phone_number = f"{0}{phones.replace(' ', '')[-9:]}"
+            #phone_number2 = f"{0}{phones2.replace(' ', '')[-9:]}"
+
+            q = BowserCompany.objects.filter(id=company_id)
+            company_name = q[0].names
+
+            HarkinBowser.objects.update_or_create(
+                bowser_company=company_name,
+                driver=driver,
+                year_of_manufacture=yom,
+                reg_number=reg_number,
+                capacity=capacity,
+                bowser_model=bowser_model
+
+
+
+
+            )
+        messages.success(request, capacity)
+        return redirect('sms:harkin_bowser')
+
+
+    clienter = BowserCompany.objects.all()
+    context = {
+        'clients': clienter
+    }
+    return render(request, 'harkin/create_bowser.html', context)
 def add_meter_upload(request):
     customer = WaterClientAll.objects.all().order_by('id')
     time = datetime.datetime.now()
@@ -1089,19 +1853,19 @@ def add_meter_upload(request):
     #cell.value = 'Meter Readings'
     #cell.alignment = Alignment(horizontal='center', vertical='center')
     #summary_sheet.merge_cells('A1:B1')
-    summary_sheet.append(('A/C','NAMES', 'METER READINGS'))
+    summary_sheet.append(('A/C','NAMES', 'PREV. READINGS','CURRENT READINGS'))
 
     number = 1
     for cust in customer:
         #summary_sheet.append((cust.id, cust.names, cust.last_meter_reading))
-        summary_sheet.append((cust.id, cust.names, 0))
+        summary_sheet.append((cust.id, cust.names,cust.last_meter_reading, 0))
         number += 1
 
     workbook.save(full_path)
     context = {
         'file_path': full_path
     }
-    return render(request, 'sms/add_meter_upload.html', context)
+    return render(request, 'sms/add_meter.html', context)
 
 
 def meter_readings_report(request):
@@ -1207,7 +1971,7 @@ def meter_readings_report(request):
             summary_sheet = workbook.get_sheet_by_name('Sheet')
             summary_sheet.title = 'ARREARS REPORT'
             #summary_sheet.title = m
-            
+
             cell = summary_sheet.cell(row=2, column=5)
 
 
@@ -1241,6 +2005,9 @@ def meter_readings_report(request):
                     month_1_arrears=total_arrears-cust.amount_0
                 else:
                     month_1_arrears=total_arrears
+                if cust.amount_0<1:
+                    month_1_arrears=0
+
                 if month_1_arrears>cust.amount_1:
                     month_2_arrears=month_1_arrears-cust.amount_1
                 else:
@@ -1253,6 +2020,7 @@ def meter_readings_report(request):
                     month_4_arrears=month_3_arrears-cust.amount_3
                 else:
                     month_4_arrears=0
+
 
 
 
@@ -1507,18 +2275,20 @@ def create_water_client(request):
             new_cn_int = cn_int + 1
             new_cn = f"RB-{new_cn_int}"
             customer_number = new_cn
+            phones = request.POST['msisdn']
+            phones2 = request.POST['msisdn2']
+            phone_number = f"{0}{phones.replace(' ', '')[-9:]}"
+            phone_number2 = f"{0}{phones2.replace(' ', '')[-9:]}"
         WaterClientAll.objects.update_or_create(
             names=request.POST['names'],
-            msisdn=request.POST['msisdn'],
+            msisdn=phone_number,
+            msisdn2=phone_number2,
             client_number=customer_number,
             id_num=request.POST['id_num'],
             connection_fee=request.POST['connection_fee'],
             connection_fee_paid=request.POST['connection_fee_paid'],
-
-
             court=court_name,
             network=network,
-
             email_address=request.POST['email_address'],
             amount_due=int(request.POST['connection_fee'])-int(request.POST['connection_fee_paid'])
 
@@ -1676,6 +2446,7 @@ def meter_replacement(request):
     if request.method == 'POST':
         comments = request.POST['comment']
         client_id = request.POST['meter']
+        meter_number = request.POST['meter_number']
         customer = WaterClientAll.objects.filter(id=client_id).first()
         last_readings = customer.last_meter_reading
         names = customer.names
@@ -1696,10 +2467,12 @@ def meter_replacement(request):
             court=court,
             amount_due=amount_due,
             network=network,
-            phone_number=phone_number
+            phone_number=phone_number,
+            meter_number=meter_number
 
         )
         customer.last_meter_reading = 0
+        customer.meter_number=meter_number
         customer.save()
 
         messages.success(request, 'Credit Updated Successfully')
@@ -1746,6 +2519,54 @@ def water_manual_payments(request):
             'clients': WaterClientAll.objects.filter().order_by('names')
         }
         return render(request, 'sms/water_manual_payment.html', context)
+
+def water_payments_allocations(request):
+
+    if request.method == 'POST':
+        comments = request.POST['comment']
+        client_id = request.POST['client_id']
+        trans_id = request.POST['trans_id']
+
+        customer = WaterClientAll.objects.filter(id=client_id).first()
+        transaction = MiwamaMpesa.objects.filter(id=trans_id).first()
+
+        names = customer.names
+        account_number = customer.id
+        phone_number=transaction.sender_phone
+        paid_by=transaction.names
+        confirmation_code = transaction.trans_id
+        amount=transaction.amount
+
+        transaction.processed = 3
+        transaction.allocated_to=names
+        transaction.account_number = account_number
+        transaction.save()
+
+
+        WaterPaymentReallocate.objects.create(
+            client=customer,
+            dest_msisdn=phone_number,
+            received_from=paid_by,
+            amount=amount,
+            confirmation_code=confirmation_code,
+            account_number=account_number,
+            account_name=names,
+            ref_id=trans_id,
+            comments=comments,
+            client_id=client_id
+
+        )
+
+
+        messages.success(request, 'Payments Allocated')
+        return redirect('sms:water_payments_allocations')
+    else:
+        context = {
+            'payments': MiwamaMpesa.objects.filter(processed=2).order_by('-id'),
+            'payments_allocated': WaterPaymentReallocate.objects.filter().order_by('-id'),
+            'clients': WaterClientAll.objects.filter().order_by('names')
+        }
+        return render(request, 'sms/water_payment_allocations.html', context)
 
 def meter_replacemet2(request):
     customer = Customer.objects.filter(user_ptr_id=request.user.id).first()
@@ -1992,14 +2813,17 @@ def import_water_clients(request):
 
                     names = worksheet.cell(row=i, column=1).value
                     phone_numbers = str(worksheet.cell(row=i, column=2).value)
-                    id_number = (worksheet.cell(row=i, column=3).value)
-                    court = (worksheet.cell(row=i, column=4).value)
-                    meter_readings = (worksheet.cell(row=i, column=5).value)
-                    amount_due = float(worksheet.cell(row=i, column=6).value)
-                    connection_fee = worksheet.cell(row=i, column=7).value
-                    connection_fee_paid = worksheet.cell(row=i, column=8).value
-                    email = worksheet.cell(row=i, column=9).value
+                    phone_numbers2 = str(worksheet.cell(row=i, column=3).value)
+                    id_number = (worksheet.cell(row=i, column=4).value)
+                    meter_number = (worksheet.cell(row=i, column=5).value)
+                    court = (worksheet.cell(row=i, column=6).value)
+                    meter_readings = (worksheet.cell(row=i, column=7).value)
+                    amount_due = float(worksheet.cell(row=i, column=8).value)
+                    connection_fee = worksheet.cell(row=i, column=9).value
+                    connection_fee_paid = worksheet.cell(row=i, column=10).value
+                    email = worksheet.cell(row=i, column=11).value
                     phone_number = f"{0}{phone_numbers.replace(' ', '')[-9:]}"
+                    phone_number2 = f"{0}{phone_numbers2.replace(' ', '')[-9:]}"
 
 
 
@@ -2019,8 +2843,10 @@ def import_water_clients(request):
                     WaterClientAll.objects.update_or_create(
                         names=names,
                         msisdn=phone_number,
+                        msisdn2=phone_number2,
                         client_number=customer_number,
                         id_num=id_number,
+                        meter_num=meter_number,
                         connection_fee=connection_fee,
                         connection_fee_paid=connection_fee_paid,
                         last_meter_reading=meter_readings,
@@ -2090,7 +2916,7 @@ def import_water_clientss(request):
             )
             return redirect('sms:contacts_upload_status', s.id)
 
-@task()
+#@task()
 def store_contact_task(group_id, extension, uploaded_file_url, f_path):
     if extension == 'csv':
         file_path = uploaded_file_url.split('/', 1)[1]
@@ -2178,7 +3004,7 @@ def express_import_contacts(request, group_id):
             return redirect('sms:contacts_upload_status', s.id)
 
 
-@task()
+#@task()
 def new_store_contact_task(group_id, extension, uploaded_file_url, f_path):
     if extension == 'csv':
         file_path = uploaded_file_url.split('/', 1)[1]
@@ -2781,7 +3607,7 @@ def c_sample_merged(request):
                 return render(request, 'sms/c_sample_merged.html', context)
 
 
-@task()
+#@task()
 def from_group_send(customer_id, total_message_cost, to_be_sent, trackingcode):
     customer = Customer.objects.filter(id=customer_id).first()
     new_credit = customer.credit - total_message_cost
@@ -3058,6 +3884,30 @@ def water_sent_sms(request):
         else:
             return render(request, 'sms/sms_reports.html')
 
+@login_required
+def water_sent_sms_client(request,client_phone):
+    customer = Customer.objects.filter(user_ptr_id=request.user.id).first()
+    if customer is not None:
+        m = WaterOutbox.objects.filter(dest_msisdn=client_phone)
+        if m.count() > 0:
+            # pprint(m)
+            context = {
+                'outgoings': m
+            }
+            return render(request, 'sms/water_sent_sms.html', context)
+        else:
+            return render(request, 'sms/water_sent_sms.html')
+    else:
+        customer = CustomerSubAccounts.objects.filter(user_ptr_id=request.user.id).first().owner
+        m = OutgoingDone.objects.filter(customer_id=customer.id)
+        if m.count() > 0:
+            # pprint(m)
+            context = {
+                'outgoings': m
+            }
+            return render(request, 'sms/sms_reports.html', context)
+        else:
+            return render(request, 'sms/sms_reports.html')
 
 @login_required()
 def customer_till_numbers(request):

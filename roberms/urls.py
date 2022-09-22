@@ -1,4 +1,5 @@
-from django.conf.urls import url
+#from django.conf.urls import url
+#from django.conf.urls import include, re_path
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
@@ -18,7 +19,7 @@ urlpatterns = [
     # url('^', include('django.contrib.auth.urls')),
 
 
-    url(r'^admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+   # url(r'^admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
     path('roberms/super/admin/', admin.site.urls),
 
     path('', include('sms.urls')),
